@@ -1,0 +1,11 @@
+
+# ignore the vscode settings
+.vscode/ 
+
+# ignore all log files
+*.log 
+
+# ignoring the iOS related file 
+.DS_Store
+
+

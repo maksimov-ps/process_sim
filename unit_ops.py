@@ -1,15 +1,5 @@
 
 
-class Stream: 
-    def __init__(self):
-        pass
-
-
-    def SRK_fun(input): 
-
-        pass 
-
-
 class Valve: 
     def __init__(self):
         pass
