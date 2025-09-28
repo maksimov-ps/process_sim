@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Protocol
-
+from chemicals.elements import molecular_weight as MW_data_import 
+from chemicals.elements import nested_formula_parser as MW_data_parser
 
 class PropertyPackageInterface(Protocol): 
     
@@ -8,7 +9,7 @@ class PropertyPackageInterface(Protocol):
     name: str
     components: tuple[str, ...]       
     
-    def get_Z(self, 
+    def get_compressibility_factor(self, 
               temperature_K: float, 
               pressure_Pa: float, 
               molar_composition: np.ndarray) -> float: ...
@@ -20,13 +21,16 @@ class PropertyPackageInterface(Protocol):
 
 
 class IdealGasBackend:
+
+    """ Ideal gas property package backend. """
+
     name = 'IdealGas'
     
     def __init__(self, 
                  components: tuple[str, ...]):
         self.components = components
 
-    def get_Z(self, 
+    def get_compressibility_factor(self, 
               temperature_K: float, 
               pressure_Pa: float, 
               molar_composition: np.ndarray,) -> float:
@@ -36,8 +40,18 @@ class IdealGasBackend:
                        temperature_K: float,
                        pressure_Pa: float,
                        molar_composition: np.ndarray) -> float:
+        
+        molecular_weight_vec_g_mol = np.array([MW_data_import(MW_data_parser(f)) for f in self.components], dtype=float) 
+        
         R = 8.314462618 # J/(mol·K)
-        return pressure_Pa / (R * temperature_K)
+        P = pressure_Pa
+        T = temperature_K
+        MW = np.dot(molecular_weight_vec_g_mol, molar_composition) / 1000 # kg/mol
+        rho = P * MW / (R * T) 
+
+        density_SI = rho 
+
+        return density_SI
     
 
 class SRK:
@@ -46,7 +60,7 @@ class SRK:
     def __init__(self, components: tuple[str, ...]):
         self.components = components
 
-    def get_Z(self, 
+    def get_compressibility_factor(self, 
               temperature_K: float, 
               pressure_Pa: float, 
               molar_composition: np.ndarray) -> float:
