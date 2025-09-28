@@ -12,6 +12,11 @@ class PropertyPackageInterface(Protocol):
               temperature_K: float, 
               pressure_Pa: float, 
               molar_composition: np.ndarray) -> float: ...
+    
+    def get_density_SI(self, 
+              temperature_K: float, 
+              pressure_Pa: float, 
+              molar_composition: np.ndarray) -> float: ...
 
 
 class IdealGasBackend:
@@ -24,12 +29,13 @@ class IdealGasBackend:
     def get_Z(self, 
               temperature_K: float, 
               pressure_Pa: float, 
-              molar_composition: np.ndarray) -> float:
+              molar_composition: np.ndarray,) -> float:
         return 1.0
     
     def get_density_SI(self,
                        temperature_K: float,
-                       pressure_Pa: float) -> float:
+                       pressure_Pa: float,
+                       molar_composition: np.ndarray) -> float:
         R = 8.314462618 # J/(mol·K)
         return pressure_Pa / (R * temperature_K)
     

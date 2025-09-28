@@ -1,6 +1,6 @@
 import numpy as np 
 from core import Stream
-from properties import IdealGasBackend
+from properties import IdealGasBackend, SRK
 
 if __name__ == "__main__":
 
