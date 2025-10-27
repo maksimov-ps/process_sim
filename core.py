@@ -8,10 +8,11 @@ class Stream:
     """ State container to store properties of streams in between unit ops. """
 
     pressure_Pa: float                  
-    temperature_K: float                     
-    molar_composition: np.ndarray       # order according to the backend property package
+    temperature_K: float         
+    components: tuple[str, ...]            
+    molar_composition: np.ndarray       # order according to components array
     molar_flow_mol_s: float             
-    backend: PropertyPackageInterface     
+    property_package_backend: PropertyPackageInterface     
 
     def __post_init__(self):
         # Validate molar composition sums to 1
@@ -23,13 +24,25 @@ class Stream:
             raise ValueError("Composition has negative entries.")
         
         # Validate composition length matches backend components
-        if len(self.molar_composition) != len(self.backend.components):
+        if len(self.molar_composition) != len(self.components):
             raise ValueError("Composition length does not match backend components.")
+
+    def vapour_fraction(self) -> float:
+        
+        flash_result = self.property_package_backend.TP_flash(pressure_Pa = self.pressure_Pa,
+                                                              temperature_K = self.temperature_K,
+                                                              components = self.components,
+                                                              molar_composition = self.molar_composition)
+        
+
+        # Placeholder implementation
+        return 0.0
 
     def compressibility_factor(self) -> float:
         return self.backend.get_compressibility_factor(self.temperature_K, self.pressure_Pa, self.molar_composition)
     
     def density_SI(self) -> float:
+
         return self.backend.get_density_SI(self.temperature_K, self.pressure_Pa, self.molar_composition)
 
     
