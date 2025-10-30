@@ -6,19 +6,21 @@ from chemicals import MW as MW_data_import
 from chemicals.acentric import omega as acentric_factor_data_import
 from chemicals.critical import Tc as critical_temperature_data_import, Pc as critical_pressure_data_import
 
+from scipy.constants import R
 
 
-class PureComponentDataBackend:
+class PureComponentDataBackend():
 
     """ Pure component property package backend. """
-    
+    components: tuple[str, ...]  
+
     def __init__(self, 
                  components: tuple[str, ...]):
         self.components = components
 
-        self.acentric_factor_data = np.zeros_like(components)
-        self.critical_temperature_K_data = np.zeros_like(components)
-        self.critical_pressure_Pa_data = np.zeros_like(components)
+        self.acentric_factor_data = np.zeros_like(a=components,dtype = float)
+        self.critical_temperature_K_data = np.zeros_like(a=components,dtype = float)
+        self.critical_pressure_Pa_data = np.zeros_like(a=components,dtype = float)
         for k in range(len(components)):
             compoent_CASRN = CAS_from_any(components[k])
             self.acentric_factor_data[k] = acentric_factor_data_import(CASRN = compoent_CASRN)  
@@ -166,8 +168,41 @@ class SoaveRedlichKwongBackend():
               temperature_K: float, 
               pressure_Pa: float, 
               molar_composition: np.ndarray) -> float:
-        # Placeholder implementation
-        return 0.9
+        
+        omega = self.pure_component_data_backend.acentric_factor_data
+        Tc = self.pure_component_data_backend.critical_temperature_K_data
+        Pc = self.pure_component_data_backend.critical_pressure_Pa_data
+
+        if len(molar_composition) > 1: 
+
+            m   = 0.48 + 1.574 * omega - 0.176 * omega**2
+            T_r = temperature_K / Tc
+            alpha = (1 + m * (1 - np.sqrt(T_r)))**2       
+            
+            # a_c = 0.42747 * (R**2 * Tc**2) / Pc
+            # b   = 0.08664 * (R * Tc) / Pc
+
+            # a = a_c * alpha 
+
+            # a_mix = (molar_composition @ np.sqrt(a))**2
+            # b_mix = molar_composition @ b 
+
+            A_mix = 0.42747 * pressure_Pa / temperature_K**2 * ( molar_composition @ (Tc * np.sqrt(alpha) / np.sqrt(Pc)) )**2
+            B_mix = 0.08664 * pressure_Pa / temperature_K * ( molar_composition @ (Tc / Pc) )
+
+            # Cubic equation coefficients: Z^3 - Z^2 + (A - B - B^2)Z - AB = 0
+            p     = [1, -1, A_mix - B_mix - B_mix**2, -1 * A_mix * B_mix]
+            roots = np.roots(p)
+
+            real_roots = roots[np.abs(roots.imag) < 1e-10].real
+            positive_roots = real_roots[real_roots > 0]
+            
+            Z_val = np.max(positive_roots) if len(positive_roots) > 0 else None
+
+            if Z_val is None:
+                raise ValueError("No physically meaningful compressibility factor found")
+
+            return Z_val
     
 
     def get_fugacity_coefs(self, 
@@ -175,6 +210,9 @@ class SoaveRedlichKwongBackend():
                            pressure_Pa: float, 
                            molar_composition: np.ndarray) -> np.ndarray:
         
+        Z_val = self.get_compressibility_factor(temperature_K=temperature_K,
+                                                pressure_Pa=pressure_Pa,
+                                                molar_composition=molar_composition)
         
 
         # Placeholder implementation
