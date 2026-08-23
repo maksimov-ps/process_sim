@@ -14,6 +14,8 @@ from thermodynamics.databases.bip_db_manager import BIPDatabaseManager
 
 from functools import partial
 
+from thermodynamics.parsers.pdf_parsers import VLEDataPDFParser
+
 def main():
 
     VLE_data = VLEData(
@@ -53,7 +55,12 @@ def main():
 
 
 if __name__ == "__main__": 
-    main()
+    # main()
+
+    vle_parser = VLEDataPDFParser()
+
+    pass
+
 
 """
 TODO: 
