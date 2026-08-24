@@ -58,6 +58,9 @@ if __name__ == "__main__":
     # main()
 
     vle_parser = VLEDataPDFParser()
+    vle_parser.get_VLE_data_from_pdf(
+        pdf_path="/Users/maksimov.ps95/Desktop/Reading/Thermodynamics/VLE data/NH3 - H2O VLE data.pdf"
+    )
 
     pass
 

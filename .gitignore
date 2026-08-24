@@ -14,4 +14,7 @@ tmp_routines/
 # ignoring the co=pilot files
 github/ 
 
+# ignoring the python cache files in all the directories
+__pycache__/
+
 
