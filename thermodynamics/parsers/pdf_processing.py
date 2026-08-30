@@ -24,7 +24,7 @@ class PDFParser():
 
         self.verbose = verbose
         self.docker_timeout_seconds = 300.0
-        
+
 
     def _verify_docker_is_available(self) -> None: 
         if shutil.which("docker") is None:
@@ -319,7 +319,7 @@ class VLEDataPDFParser(PDFParser):
         """
 
         consolidate_header = "1" 
-        tei_coordinates_items = ["s", "biblStruct", "figure", "table"]
+        tei_coordinates_items = ["s", "ref", "biblStruct", "figure", "table"]
 
         grobid_config: list[tuple[str, str]] = [
             ("consolidateHeader", consolidate_header),
@@ -352,9 +352,10 @@ class VLEDataPDFParser(PDFParser):
     def _extract_VLE_data_from_tei_xml(self, tei_xml: str) -> dict:
 
         xml_parser = XMLParser(xml_file=tei_xml)
+        metadata = xml_parser.get_metadata()
+        vle_data = xml_parser.get_VLE_data()
 
-
-        pass
+        return {"metadata": metadata, "vle_data": vle_data}
 
 
 
@@ -363,7 +364,6 @@ class VLEDataPDFParser(PDFParser):
         grobid_output = self._send_pdf_to_grobid_via_http(pdf_path)
         tei_xml = grobid_output["tei_xml"]
         vle_data = self._extract_VLE_data_from_tei_xml(tei_xml)
-
 
         return vle_data
 
