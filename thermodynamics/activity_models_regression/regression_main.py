@@ -14,7 +14,7 @@ from thermodynamics.databases.bip_db_manager import BIPDatabaseManager
 
 from functools import partial
 
-from thermodynamics.parsers.pdf_parsers import VLEDataPDFParser
+from thermodynamics.parsers.pdf_processing import VLEDataPDFParser
 
 def main():
 

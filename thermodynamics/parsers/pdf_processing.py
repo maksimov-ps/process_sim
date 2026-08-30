@@ -5,6 +5,7 @@ from pathlib import Path
 
 import requests
 
+from thermodynamics.parsers.xml_parser import XMLParser
 
 class DockerNotAvailableError(RuntimeError):
     """Raised when Docker is not available on the system."""
@@ -18,11 +19,12 @@ class GrobidError(RuntimeError):
 class PDFParser(): 
 
     def __init__(self, 
+                 xml_parsing_engine: XMLParser | None = None,
                  verbose: bool = True): 
 
         self.verbose = verbose
         self.docker_timeout_seconds = 300.0
-
+        
 
     def _verify_docker_is_available(self) -> None: 
         if shutil.which("docker") is None:
@@ -348,6 +350,8 @@ class VLEDataPDFParser(PDFParser):
 
 
     def _extract_VLE_data_from_tei_xml(self, tei_xml: str) -> dict:
+
+        xml_parser = XMLParser(xml_file=tei_xml)
 
 
         pass
